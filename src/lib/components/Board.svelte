@@ -1,8 +1,7 @@
 <script>
     import { passive } from "svelte/legacy";
   
-      let { size } = $props();
-      let game_over = $state(false);
+      let { size , gameover=$bindable() , iswon=$bindable() } = $props();
       let mode = $state("reveal");
 
       let longPressTimer;
@@ -96,11 +95,11 @@
         if (boxes[i].isbomb) {
             boxes[i].message = "💣";
             boxes[i].isRevealed = true;
-            await new Promise(resolve => setTimeout(resolve, 1000)); // delay between each bomb reveal
+            await new Promise(resolve => setTimeout(resolve, 500)); // delay between each bomb reveal
         }
     }
         await new Promise(resolve => setTimeout(resolve, 100));
-        game_over = true;
+        gameover = true;
     }
 
     let remaining_count = $derived.by(()=>{
@@ -109,14 +108,17 @@
         return total - revealed;
     });
 
-
+    $effect( ()=>{
+        iswon = (remaining_count == 0);
+        }
+    );
 
   
   
   </script>
   
 <div class="flex flex-col items-center w-full p-4">
-    {#if remaining_count !== 0 && !game_over}
+    {#if remaining_count !== 0 && !gameover}
         <div class="mb-6 text-center">
             <button 
                 class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mb-2"
@@ -142,13 +144,9 @@
         </div>
         
         <p class="text-lg font-semibold">Remaining: {remaining_count}</p>
-    {:else if remaining_count === 0 && !game_over}
+    {:else if remaining_count === 0 && !gameover}
         <div class="flex flex-col items-center justify-center h-60 w-full">
             <p class="text-4xl sm:text-6xl md:text-9xl text-green-600 font-bold animate-pulse">You won!</p>
-        </div>
-    {:else if game_over}
-        <div class="flex flex-col items-center justify-center h-60 w-full">
-            <p class="text-4xl sm:text-6xl md:text-9xl text-red-600 font-bold animate-bounce">Game over</p>
         </div>
     {/if}
 </div>
