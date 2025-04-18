@@ -3,6 +3,7 @@
   
       let { size } = $props();
       let game_over = $state(false);
+      let mode = $state("reveal");
 
       let longPressTimer;
 
@@ -15,6 +16,7 @@
         function onTouchEnd() {
             clearTimeout(longPressTimer);
         }
+
 
 
       let bombs = $derived.by( ()=>{
@@ -69,7 +71,8 @@
             box.message = box.isFlagged ? "🚩" : "";
     }
       function reveal(box , e){
-        if(box.isFlaged|| box.isRevealed) return
+        if (mode === "flag") flag(box ,e)
+        else if(box.isFlaged|| box.isRevealed) return
         else if(box.isbomb) reveal_bombs(box)
         else {
             box.message = box.isSurrounded;
@@ -114,13 +117,15 @@
   
   <div class="flex w-full justify-center">
     {#if remaining_count !=0 && !game_over}
+    <div>
+        <button onclick={()=> mode =  (mode=="reveal") ? "flag" : "reveal"}>Toggle mode</button>
+        <p>Current mode : {mode}</p>
+    </div>
       <div class="grid gap-1 max-w-3/4s elf-center" style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
           {#each boxes as box }
             <button class="bg-gray-500 border-gray-900 w-15 h-15" 
-              onclick={(e) =>{reveal(box , e)}}
-              oncontextmenu={(e) => flag(box, e)}        
-              ontouchstart={(e) => onTouchStart(box, e)} 
-              ontouchend={onTouchEnd}>
+              onclick={(e) =>{reveal(box ,e)}}
+              oncontextmenu={(e) => flag(box, e)}>
                 {@html box.message}
             </button>
           {/each}
