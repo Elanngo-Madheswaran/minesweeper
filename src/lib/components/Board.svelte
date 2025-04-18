@@ -2,6 +2,7 @@
     import { passive } from "svelte/legacy";
   
       let { size } = $props();
+      let game_over = $state(false);
 
       let bombs = $derived.by( ()=>{
             let no = Math.floor((size * size) / 4);
@@ -43,9 +44,11 @@
                   }));
 
       function reveal(box){
-        if(box.isRevealed || box.isbomb) return
-        box.message = box.isSurrounded;
-        box.isRevealed = true;
+        if(box.isbomb) reveal_bombs(box)
+        else if(box.isRevealed || box.isbomb) return
+        else {
+            box.message = box.isSurrounded;
+            box.isRevealed = true;
         if (box.isSurrounded == 0){
             const n = box.id;
             const row = Math.floor(n / size);
@@ -57,7 +60,20 @@
                 }
             }
         }
+    }
       }
+
+    async function reveal_bombs(){
+        for (let i = 0; i < boxes.length; i++) {
+        if (boxes[i].isbomb) {
+            boxes[i].message = "💣";
+            boxes[i].isRevealed = true;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // delay between each bomb reveal
+        }
+    }
+        await new Promise(resolve => setTimeout(resolve, 100));
+        game_over = true;
+    }
 
     let remaining_count = $derived.by(()=>{
         let total = boxes.length;
@@ -72,14 +88,16 @@
   </script>
   
   <div class="flex w-full justify-center">
-    {#if remaining_count !=0}
+    {#if remaining_count !=0 && !game_over}
       <div class="grid gap-1 max-w-3/4s elf-center" style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
           {#each boxes as box }
-              <button class="bg-gray-500 border-gray-900 w-15 h-15" onclick={() =>{reveal(box)}}>{box.message}</button>
+              <button class="bg-gray-500 border-gray-900 w-15 h-15" onclick={() =>{reveal(box)}}>{@html box.message}</button>
           {/each}
       </div>
       <p>Boxes to reveal:{remaining_count}</p>
-    {:else}
+    {:else if remaining_count ==0 && !game_over}
       <p class="text-9xl text-green-600 text-center">You won</p>
+    {:else if game_over}
+      <p class="text-9xl text-red-600 text-center ">Game over</p>
     {/if}
   </div>
