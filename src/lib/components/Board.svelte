@@ -115,25 +115,40 @@
   
   </script>
   
-  <div class="flex w-full justify-center">
-    {#if remaining_count !=0 && !game_over}
-    <div>
-        <button onclick={()=> mode =  (mode=="reveal") ? "flag" : "reveal"}>Toggle mode</button>
-        <p>Current mode : {mode}</p>
-    </div>
-      <div class="grid gap-1 max-w-3/4s elf-center" style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
-          {#each boxes as box }
-            <button class="bg-gray-500 border-gray-900 w-15 h-15" 
-              onclick={(e) =>{reveal(box ,e)}}
-              oncontextmenu={(e) => flag(box, e)}>
-                {@html box.message}
+<div class="flex flex-col items-center w-full p-4">
+    {#if remaining_count !== 0 && !game_over}
+        <div class="mb-6 text-center">
+            <button 
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mb-2"
+                onclick={() => mode = (mode === "reveal") ? "flag" : "reveal"}>
+                Toggle mode
             </button>
-          {/each}
-      </div>
-      <p>Boxes to reveal:{remaining_count}</p>
-    {:else if remaining_count ==0 && !game_over}
-      <p class="text-9xl text-green-600 text-center">You won</p>
+            <p class="text-lg font-medium">Current mode: <span class="capitalize font-bold">{mode}</span></p>
+        </div>
+        
+        <div class="w-full max-w-md mx-auto mb-4">
+            <div 
+                class="grid gap-1 sm:gap-2" 
+                style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
+                {#each boxes as box}
+                    <button 
+                        class="aspect-square bg-gray-300 hover:bg-gray-400 border-2 border-gray-500 text-lg sm:text-xl md:text-2xl font-bold flex items-center justify-center transition-colors {box.isRevealed ? 'bg-gray-100' : ''}"
+                        onclick={(e) => reveal(box, e)}
+                        oncontextmenu={(e) => flag(box, e)}>
+                        {@html box.message}
+                    </button>
+                {/each}
+            </div>
+        </div>
+        
+        <p class="text-lg font-semibold">Remaining: {remaining_count}</p>
+    {:else if remaining_count === 0 && !game_over}
+        <div class="flex flex-col items-center justify-center h-60 w-full">
+            <p class="text-4xl sm:text-6xl md:text-9xl text-green-600 font-bold animate-pulse">You won!</p>
+        </div>
     {:else if game_over}
-      <p class="text-9xl text-red-600 text-center ">Game over</p>
+        <div class="flex flex-col items-center justify-center h-60 w-full">
+            <p class="text-4xl sm:text-6xl md:text-9xl text-red-600 font-bold animate-bounce">Game over</p>
+        </div>
     {/if}
-  </div>
+</div>
