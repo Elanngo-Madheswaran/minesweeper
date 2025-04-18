@@ -59,14 +59,27 @@
         }
       }
 
+    let remaining_count = $derived.by(()=>{
+        let total = boxes.length;
+        let revealed = boxes.filter( (box) => box.isRevealed || box.isbomb ).length;
+        return total - revealed;
+    });
+
+
+
   
   
   </script>
   
   <div class="flex w-full justify-center">
-      <div class="grid gap-1 max-w-3/4 self-center" style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
+    {#if remaining_count !=0}
+      <div class="grid gap-1 max-w-3/4s elf-center" style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
           {#each boxes as box }
-              <button class="bg-gray-500 border-gray-900 w-10 h-10" onclick={() =>{reveal(box)}}>{box.message}</button>
+              <button class="bg-gray-500 border-gray-900 w-15 h-15" onclick={() =>{reveal(box)}}>{box.message}</button>
           {/each}
       </div>
+      <p>Boxes to reveal:{remaining_count}</p>
+    {:else}
+      <p class="text-9xl text-green-600 text-center">You won</p>
+    {/if}
   </div>
