@@ -4,6 +4,19 @@
       let { size } = $props();
       let game_over = $state(false);
 
+      let longPressTimer;
+
+        function onTouchStart(box, e) {
+            longPressTimer = setTimeout(() => {
+                flag(box, e);
+            }, 600); // 600ms for long press
+        }
+
+        function onTouchEnd() {
+            clearTimeout(longPressTimer);
+        }
+
+
       let bombs = $derived.by( ()=>{
             let no = Math.floor((size * size) / 4);
             let arr = Array.from({length :size*size}, (_ ,i) => i)
@@ -40,12 +53,24 @@
       }
     
       let boxes = $state( Array.from({length :size*size}, (_ ,i) =>{
-              return {id:i , isbomb:bombs.includes(i) , isSurrounded:checksurround(i) , message:"" , isRevealed : false}
+              return {id:i,
+                    isbomb:bombs.includes(i) , 
+                    isSurrounded:checksurround(i) , 
+                    essage:"" , 
+                    isRevealed : false,
+                    isFlaged : false
+                }
                   }));
 
-      function reveal(box){
-        if(box.isbomb) reveal_bombs(box)
-        else if(box.isRevealed || box.isbomb) return
+    function flag(box, e) {
+            e.preventDefault(); // prevent right-click context menu
+            if (box.isRevealed) return;
+            box.isFlagged = !box.isFlagged;
+            box.message = box.isFlagged ? "🚩" : "";
+    }
+      function reveal(box , e){
+        if(box.isFlaged|| box.isRevealed) return
+        else if(box.isbomb) reveal_bombs(box)
         else {
             box.message = box.isSurrounded;
             box.isRevealed = true;
@@ -91,7 +116,13 @@
     {#if remaining_count !=0 && !game_over}
       <div class="grid gap-1 max-w-3/4s elf-center" style="grid-template-columns: repeat({size}, minmax(0, 1fr));">
           {#each boxes as box }
-              <button class="bg-gray-500 border-gray-900 w-15 h-15" onclick={() =>{reveal(box)}}>{@html box.message}</button>
+            <button class="bg-gray-500 border-gray-900 w-15 h-15" 
+              onclick={(e) =>{reveal(box , e)}}
+              oncontextmenu={(e) => flag(box, e)}        
+              ontouchstart={(e) => onTouchStart(box, e)} 
+              ontouchend={onTouchEnd}>
+                {@html box.message}
+            </button>
           {/each}
       </div>
       <p>Boxes to reveal:{remaining_count}</p>
