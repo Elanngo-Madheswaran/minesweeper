@@ -117,7 +117,7 @@
   
   </script>
   
-<div class="flex flex-col items-center w-full p-4">
+<div class="flex flex-col items-center w-full sm:p-4">
     {#if remaining_count !== 0 && !gameover}
         <div class="mb-6 text-center">
             <button 
